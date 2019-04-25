@@ -1,12 +1,15 @@
+const MerkleTree = require("merkletreejs")
 const SHA256 = require("crypto-js/sha256");
 
 class Block {
+
   constructor(timestamp, transactions, previousHash = '') {
     this.previousHash = previousHash;
     this.timestamp = timestamp;
     this.transactions = transactions
     this.hash = this.calculateHash();
     this.nonce = 0;
+    this.merkleRoot = null;
   }
 
   calculateHash() {
@@ -37,9 +40,9 @@ class Blockchain {
     return new Block("01/01/2018", "Genesis Block", "0");
   }
 
-  minePendingTransactions(miningReward) {
-    const rewardTx = new Transaction(null, miningRewardAdress, this.miningReward);
-    createTransaction(rewardTx);
+  minePendingTransactions(miningRewardAddress) {
+    const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
+    this.createTransaction(rewardTx);
     let block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash);
     block.mineBlock(this.difficulty);
     console.log("Block successfully mined.");
