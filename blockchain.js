@@ -65,8 +65,14 @@ class Blockchain {
     this.pendingTransactions = [];
   }
 
-  createTransaction(transaction) {
-    this.pendingTransactions.push(transaction);
+  addTransaction(transaction) {
+    if (!transaction.fromAddress || !transaction.toAddress) {
+      throw new Error('Transaction must include from and to addresses');
+    }
+    if (!transaction.isValid()) {
+      throw new Error('Cannot add invalid transaction to chain');
+    }
+    this.pendingTransactions.push(transaction)
   }
 
   getBalanceOfAddress(address) {
@@ -117,10 +123,29 @@ class Transaction {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;
+    this.timestamp = Date.now();
   }
 
-  hash() {
-    return sha256(this)
+  calculateHash() {
+    return SHA256(this.fromAddress + this.toAddress + this.amount + this.timestamp).toString();
+  }
+
+  signTransaction(wallet) {
+    if (wallet.publicKey !== this.fromAddress) {
+      throw new Error("You cannot sign transactions for other wallets.");
+    }
+    const hashTx = this.calculateHash();
+    const sig = wallet.keyPair.sign(hashTx, 'base64');
+    this.signature = sig.toDER('hex');
+  }
+
+  hasValidTransactions() {
+    for (const tx of this.transactions) {
+      if (!tx.isValid()) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

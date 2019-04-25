@@ -8,11 +8,9 @@ class Wallet {
     const publicKey = key.getPublic("hex");
     const privateKey = key.getPrivate("hex");
 
-    this.publicKey = publicKey
-    this.privateKey = privateKey
-
-    console.log("\nYour public key:\n", publicKey);
-    console.log("\nYour private key:\n", privateKey);
+    this.keyPair = key;
+    this.publicKey = publicKey;
+    this.privateKey = privateKey;
   }
 }
 
