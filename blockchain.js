@@ -2,6 +2,8 @@ const {
   MerkleTree
 } = require("merkletreejs")
 const SHA256 = require("crypto-js/sha256");
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 
 class Block {
 
@@ -40,6 +42,15 @@ class Block {
     }
     const tree = new MerkleTree(leaves, SHA256);
     return tree;
+  }
+
+  hasValidTransactions() {
+    for (const tx of this.transactions) {
+      if (!tx.isValid()) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
@@ -107,6 +118,9 @@ class Blockchain {
       const currentBlock = this.chain[i];
       const previousBlock = this.chain[i - 1];
 
+      if (!currentBlock.hasValidTransactions()) {
+        return false;
+      }
       if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false;
       }
@@ -139,13 +153,13 @@ class Transaction {
     this.signature = sig.toDER('hex');
   }
 
-  hasValidTransactions() {
-    for (const tx of this.transactions) {
-      if (!tx.isValid()) {
-        return false;
-      }
+  isValid() {
+    if (this.fromAddress === null) return true; // Mining reward
+    if (!this.signature || this.signature.length === 0) {
+      throw new Error('No signature in this transaction');
     }
-    return true;
+    const publicKey = ec.keyFromPublic(this.fromAddress, 'hex');
+    return publicKey.verify(this.calculateHash(), this.signature);
   }
 }
 

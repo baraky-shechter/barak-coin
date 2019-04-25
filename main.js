@@ -34,6 +34,8 @@ const {
 const myIp = toLocalIp(me);
 const peersIps = getPeerIps(peers);
 
+const barakCoin = new Blockchain()
+
 console.log('---------------------');
 console.log('Welcome to barak coin');
 console.log('My IP: ', myIp)
@@ -43,16 +45,16 @@ const wallet = new Wallet();
 console.log("\nYour public key:\n", wallet.publicKey);
 console.log("\nYour private key:\n", wallet.privateKey);
 
-console.log('\n1\tJoin as full node');
-console.log('2\tJoin as wallet');
+console.log('\n1\tJoin as Full Node');
+console.log('2\tJoin as Wallet-SPV');
 readline.question('Choose Option: ', (option) => {
   const message = option.toString().trim();
   if (message === '1') {
-    console.log("Joining as full node...");
-    const fullNode = new FullNode(myIp, wallet, new Blockchain())
+    console.log("Joining as Full Node...");
+    const fullNode = new FullNode(myIp, wallet, barakCoin)
     console.log(fullNode);
   } else if (message === '2') {
-    console.log("Joining as wallet...");
+    console.log("Joining as Wallet SPV...");
     joinAsWallet();
   } else {
     console.log("Input error.");
