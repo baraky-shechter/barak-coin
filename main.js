@@ -1,96 +1,108 @@
 const topology = require('fully-connected-topology');
-
-const readline = require('readline').createInterface({
-  input: process.stdin,
-  output: process.stdout
-})
-
+const net = require('net');
 const {
   stdin,
   exit,
   argv
 } = process;
-
-const {
-  me,
-  peers
-} = extractPeersAndMyPort();
+// const {
+//   me,
+//   peers
+// } = extractPeersAndMyPort();
 const sockets = {};
-
 const {
   Blockchain,
   Block,
   Transaction
 } = require('./blockchain.js');
-
 const {
   Wallet
 } = require('./wallet.js');
-
 const {
-  FullNode
-} = require('./fullNode.js');
-
-const myIp = toLocalIp(me);
-const peersIps = getPeerIps(peers);
-
+  Peer,
+  FullNode,
+  WalletNode
+} = require('./peer.js')
+// const myIp = toLocalIp(me);
+// const peersIps = getPeerIps(peers);
 const barakCoin = new Blockchain()
 
 console.log('---------------------');
 console.log('Welcome to barak coin');
-console.log('My IP: ', myIp)
+// console.log('My IP: ', myIp)
 
 console.log('\nCreating wallet...');
-const wallet = new Wallet();
-console.log("\nYour public key:\n", wallet.publicKey);
-console.log("\nYour private key:\n", wallet.privateKey);
+const myWallet = new Wallet();
+console.log("\nYour public key:\n", myWallet.publicKey);
+console.log("\nYour private key:\n", myWallet.privateKey);
 
-console.log('\n1\tJoin as Full Node');
-console.log('2\tJoin as Wallet-SPV');
-readline.question('Choose Option: ', (option) => {
-  const message = option.toString().trim();
-  if (message === '1') {
-    console.log("Joining as Full Node...");
-    const fullNode = new FullNode(myIp, wallet, barakCoin)
-    console.log(fullNode);
-  } else if (message === '2') {
-    console.log("Joining as Wallet SPV...");
-    joinAsWallet();
-  } else {
-    console.log("Input error.");
-    exit(0);
-  }
-  readline.close()
-})
 
-function joinAsFullNode() {
+console.log("\nCreating 2 Wallet nodes...");
+const fullNode = new FullNode('127.0.0.1:4000', myWallet, barakCoin);
+const peer1 = new WalletNode('127.0.0.2:4000', new Wallet(), []);
+const peer2 = new WalletNode('127.0.0.3:4000', new Wallet(), []);
+
+const peers = {
+  fullNode,
+  peer1,
+  peer2
+};
+
+console.log(peers);
+
+console.log(barakCoin.getBalanceOfAddress(peer2.wallet.publicKey));
+
+barakCoin.addTransaction(new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 50));
+
+// console.log(barakCoin.pendingTransactions);
+
+console.log("\n Starting the miner...");
+barakCoin.minePendingTransactions(fullNode.wallet.publicKey);
+
+console.log(barakCoin.getBalanceOfAddress(peer2.wallet.publicKey));
+
+
+// topology(myIp, [peer1.ip, peer2.ip]).on('connection', (socket, peerIp) => {
+//   const peerPort = extractPortFromIp(peerIp)
+//   log('connected to peer - ')
+// })
+
+// console.log('\n1\tJoin as Full Node');
+// console.log('2\tJoin as Wallet-SPV');
+// readline.question('Choose Option: ', (option) => {
+//   const message = option.toString().trim();
+//   if (message === '1') {
+//     console.log("Joining as Full Node...");
+//     const barakCoin = new Blockchain();
+//     const me = new FullNode(myIp, myWallet, barakCoin);
+//     console.log(me);
+//   } else if (message === '2') {
+//     console.log("Joining as Wallet SPV...");
+//     const blockHeaders = [];
+//     const me = new WalletNode(myIp, myWallet, blockHeaders);
+//     console.log(me);
+//   } else {
+//     console.log("Input error.");
+//     exit(0);
+//   }
+//   readline.close()
+// })
+
+function connectToP2pListServer() {
 
 }
 
 // let barakCoin = new Blockchain();
 //
-// barakCoin.createTransaction(new Transaction('address1', 'address2', 100));
-// barakCoin.createTransaction(new Transaction('address2', 'address1', 50));
-//
-// // console.log(barakCoin.pendingTransactions);
-//
-// console.log("\n Starting the miner...");
-// barakCoin.minePendingTransactions('address');
-//
-// console.log("\n Balance of address is: ", barakCoin.getBalanceOfAddress("address"));
-//
-// console.log("\n Starting the miner again...");
-// barakCoin.minePendingTransactions("address");
-//
-// console.log("\n Balance of address is: ", barakCoin.getBalanceOfAddress("address"));
+
 
 //extract ports from process arguments, {me: first_port, peers: rest... }
-function extractPeersAndMyPort() {
-  return {
-    me: argv[2],
-    peers: argv.slice(3, argv.length)
-  }
-}
+// function extractPeersAndMyPort() {
+//   return {
+//     me: argv[2],
+//     peers: argv.slice(3, argv.length)
+//   }
+// }
 //'4000' -> '127.0.0.1:4000'
 function toLocalIp(port) {
   return '127.0.0.1:' + port

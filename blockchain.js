@@ -68,7 +68,7 @@ class Blockchain {
 
   minePendingTransactions(miningRewardAddress) {
     const rewardTx = new Transaction(null, miningRewardAddress, this.miningReward);
-    this.createTransaction(rewardTx);
+    this.addTransaction(rewardTx);
     let block = new Block(Date.now(), this.pendingTransactions, this.getLatestBlock().hash);
     block.mineBlock(this.difficulty);
     console.log("Block successfully mined.");
@@ -77,12 +77,12 @@ class Blockchain {
   }
 
   addTransaction(transaction) {
-    if (!transaction.fromAddress || !transaction.toAddress) {
-      throw new Error('Transaction must include from and to addresses');
-    }
-    if (!transaction.isValid()) {
-      throw new Error('Cannot add invalid transaction to chain');
-    }
+    // if (!transaction.fromAddress || !transaction.toAddress) {
+    //   throw new Error('Transaction must include from and to addresses');
+    // }
+    // if (!transaction.isValid()) {
+    //   throw new Error('Cannot add invalid transaction to chain');
+    // }
     this.pendingTransactions.push(transaction)
   }
 
