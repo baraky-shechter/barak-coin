@@ -1,4 +1,6 @@
-const MerkleTree = require("merkletreejs")
+const {
+  MerkleTree
+} = require("merkletreejs")
 const SHA256 = require("crypto-js/sha256");
 
 class Block {
@@ -9,7 +11,7 @@ class Block {
     this.transactions = transactions
     this.hash = this.calculateHash();
     this.nonce = 0;
-    this.merkleRoot = null;
+    this.merkleTree = this.createMerkleTree();
   }
 
   calculateHash() {
@@ -26,6 +28,18 @@ class Block {
     console.log("BLOCK MINED: " + this.hash + " " + this.nonce);
   }
 
+  sha256(data) {
+    return crypto.createHash('sha256').update(data).digest();
+  }
+
+  createMerkleTree() {
+    var leaves = [];
+    for (var i = 0; i < this.transactions.length; ++i) {
+      leaves.push(JSON.stringify(this.transactions[i]));
+    }
+    const tree = new MerkleTree(leaves, SHA256);
+    return tree;
+  }
 }
 
 class Blockchain {
@@ -102,6 +116,10 @@ class Transaction {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;
+  }
+
+  hash() {
+    return sha256(this)
   }
 }
 

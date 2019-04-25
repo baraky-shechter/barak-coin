@@ -9,6 +9,8 @@ let barakCoin = new Blockchain();
 barakCoin.createTransaction(new Transaction('address1', 'address2', 100));
 barakCoin.createTransaction(new Transaction('address2', 'address1', 50));
 
+// console.log(barakCoin.pendingTransactions);
+
 console.log("\n Starting the miner...");
 barakCoin.minePendingTransactions('address');
 
