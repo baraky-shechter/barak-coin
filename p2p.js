@@ -1,28 +1,32 @@
-const topology = require('fully-connected-topology')
+const topology = require('fully-connected-topology');
 const {
   stdin,
   exit,
   argv
-} = process
+} = process;
 const {
   log
-} = console
+} = console;
 const {
   me,
   peers
-} = extractPeersAndMyPort()
+} = extractPeersAndMyPort();
 const sockets = {}
-log('---------------------')
-log('Welcome to p2p chat!')
-log('me - ', me)
-log('peers - ', peers)
-log('connecting to peers...')
+
 const myIp = toLocalIp(me)
 const peerIps = getPeerIps(peers)
+
+console.log('---------------------');
+console.log('Welcome to barak coin');
+console.log('me - ', myIp);
+console.log('peers - ', peersIps);
+console.log('Connecting to peers...');
+
 topology(myIp, peerIps).on('connection', (socket, peerIp) => {
   const peerPort = extractPortFromIp(peerIp)
   log('connected to peer - ', peerPort)
   sockets[peerPort] = socket
+
   stdin.on('data', data => { //on user input
     const message = data.toString().trim()
     if (message === 'exit') { //on exit
@@ -41,6 +45,7 @@ topology(myIp, peerIps).on('connection', (socket, peerIp) => {
   //print data when received
   socket.on('data', data => log(data.toString('utf8')))
 })
+
 //extract ports from process arguments, {me: first_port, peers: rest... }
 function extractPeersAndMyPort() {
   return {
