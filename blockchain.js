@@ -12,6 +12,7 @@ class Block {
     this.hash = this.calculateHash();
     this.nonce = 0;
     this.merkleTree = this.createMerkleTree();
+    this.merkleRoot = this.merkleTree.getRoot().toString('hex');
   }
 
   calculateHash() {
