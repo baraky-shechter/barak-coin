@@ -77,13 +77,11 @@ class Blockchain {
   }
 
   addTransaction(transaction) {
-    // if (!transaction.fromAddress || !transaction.toAddress) {
-    //   throw new Error('Transaction must include from and to addresses');
-    // }
-    // if (!transaction.isValid()) {
-    //   throw new Error('Cannot add invalid transaction to chain');
-    // }
-    this.pendingTransactions.push(transaction)
+    if (!transaction.isValid()) {
+      throw new Error('Cannot add invalid transaction to chain');
+    } else {
+      this.pendingTransactions.push(transaction)
+    }
   }
 
   getBalanceOfAddress(address) {
