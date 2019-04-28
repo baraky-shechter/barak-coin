@@ -4,6 +4,7 @@ const {
 const SHA256 = require("crypto-js/sha256");
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
+const BloomFilter = require('bloom-filter');
 
 class Block {
 
@@ -15,6 +16,7 @@ class Block {
     this.nonce = 0;
     this.merkleTree = this.createMerkleTree();
     this.merkleRoot = this.merkleTree.getRoot().toString('hex');
+    this.filter = this.createBloomFilter();
   }
 
   calculateHash() {
@@ -42,6 +44,16 @@ class Block {
     }
     const tree = new MerkleTree(leaves, SHA256);
     return tree;
+  }
+
+  createBloomFilter() {
+    var numberOfElements = this.transactions.length;
+    var falsePositiveRate = 0.1;
+    var filter = BloomFilter.create(numberOfElements, falsePositiveRate);
+    for (var i = 0; i < this.transactions.length; ++i) {
+      filter.insert(this.transactions[i]);
+    }
+    return filter;
   }
 
   hasValidTransactions() {

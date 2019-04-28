@@ -19,6 +19,7 @@ const {
   FullNode,
   WalletNode
 } = require('./peer.js')
+const fs = require('fs');
 
 const barakCoin = new Blockchain()
 
@@ -76,22 +77,57 @@ function setUp(callback) {
   const tx3 = new Transaction(peer2.wallet.publicKey, peer1.wallet.publicKey, 47);
   const tx4 = new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 75);
 
+  const tx5 = new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 12);
+  const tx6 = new Transaction(peer2.wallet.publicKey, peer1.wallet.publicKey, 19);
+  const tx7 = new Transaction(peer2.wallet.publicKey, peer1.wallet.publicKey, 170);
+  const tx8 = new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 80);
+
+  const tx9 = new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 9);
+  const tx10 = new Transaction(peer2.wallet.publicKey, peer1.wallet.publicKey, 15);
+  const tx11 = new Transaction(peer2.wallet.publicKey, peer1.wallet.publicKey, 74);
+  const tx12 = new Transaction(peer1.wallet.publicKey, peer2.wallet.publicKey, 57);
+
   tx1.signTransaction(peer1.wallet);
   tx2.signTransaction(peer2.wallet);
   tx3.signTransaction(peer2.wallet);
   tx4.signTransaction(peer1.wallet);
+  tx5.signTransaction(peer1.wallet);
+  tx6.signTransaction(peer2.wallet);
+  tx7.signTransaction(peer2.wallet);
+  tx8.signTransaction(peer1.wallet);
+  tx9.signTransaction(peer1.wallet);
+  tx10.signTransaction(peer2.wallet);
+  tx11.signTransaction(peer2.wallet);
+  tx12.signTransaction(peer1.wallet);
 
   console.log("Adding transactions to pending transactions...");
   barakCoin.addTransaction(tx1);
   barakCoin.addTransaction(tx2);
+  barakCoin.addTransaction(tx3);
+  barakCoin.addTransaction(tx4);
 
   console.log("Mining pending transactions...");
   barakCoin.minePendingTransactions(fullNode.wallet.publicKey);
 
-  console.log(fullNode.blockchain.getBalanceOfAddress(peer2.wallet.publicKey));
-  console.log(barakCoin.getBalanceOfAddress(peer1.wallet.publicKey));
-  console.log(barakCoin.getBalanceOfAddress(fullNode.wallet.publicKey));
-  console.log(fullNode.blockchain);
+  barakCoin.addTransaction(tx5);
+  barakCoin.addTransaction(tx6);
+  barakCoin.addTransaction(tx7);
+  barakCoin.addTransaction(tx8);
+
+  console.log("Mining pending transactions...");
+  barakCoin.minePendingTransactions(fullNode.wallet.publicKey);
+
+  barakCoin.addTransaction(tx9);
+  barakCoin.addTransaction(tx10);
+  barakCoin.addTransaction(tx11);
+  barakCoin.addTransaction(tx12);
+
+  console.log("Mining pending transactions...");
+  barakCoin.minePendingTransactions(fullNode.wallet.publicKey);
+
+  var json = JSON.stringify(barakCoin);
+  fs.writeFile('output.json', json, 'utf8', callback);
+
 
   for (block of fullNode.blockchain.chain) {
     console.log(block.merkleTree);
@@ -101,62 +137,6 @@ function setUp(callback) {
   callback(this.fullNode, this.peer1, this.peer2);
 }
 
-
-
-// const peers = {
-//   fullNode,
-//   peer1,
-//   peer2
-// };
-
-// console.log(peers);
-
-
-
-
-//
-// // console.log(barakCoin.pendingTransactions);
-//
-// console.log("\n Starting the miner...");
-
-//
-// console.log(barakCoin.getBalanceOfAddress(peer2.wallet.publicKey));
-
-
-// console.log('\n1\tJoin as Full Node');
-// console.log('2\tJoin as Wallet-SPV');
-// readline.question('Choose Option: ', (option) => {
-//   const message = option.toString().trim();
-//   if (message === '1') {
-//     console.log("Joining as Full Node...");
-//     const barakCoin = new Blockchain();
-//     const me = new FullNode(myIp, myWallet, barakCoin);
-//     console.log(me);
-//   } else if (message === '2') {
-//     console.log("Joining as Wallet SPV...");
-//     const blockHeaders = [];
-//     const me = new WalletNode(myIp, myWallet, blockHeaders);
-//     console.log(me);
-//   } else {
-//     console.log("Input error.");
-//     exit(0);
-//   }
-//   readline.close()
-// })
-
-
-// let barakCoin = new Blockchain();
-//
-
-
-//extract ports from process arguments, {me: first_port, peers: rest... }
-// function extractPeersAndMyPort() {
-//   return {
-//     me: argv[2],
-//     peers: argv.slice(3, argv.length)
-//   }
-// }
-//'4000' -> '127.0.0.1:4000'
 function toLocalIp(port) {
   return '127.0.0.1:' + port
 }
